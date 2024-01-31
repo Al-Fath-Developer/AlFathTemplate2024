@@ -44,13 +44,17 @@ Gunakan template Spreadsheet yang sudah ada: https://docs.google.com/spreadsheet
 
 # Dimintain kayak gini?
 ## Solusinya?
+
 ![image](https://github.com/atiohaidar/AlFathTemplate2024/assets/66902140/d216ca3e-68e4-468a-ab42-1fb8415290c5)
+
 Tinjau izin aja, klik aja
   terus login login
 Aku harus pencet apa?
+
   ![image](https://github.com/atiohaidar/AlFathTemplate2024/assets/66902140/cca3bbca-ca29-4fce-8ade-7a7433f17906)
 
-  pencet lanjutan, terus pencet ini
+pencet lanjutan, terus pencet ini
+
   ![image](https://github.com/atiohaidar/AlFathTemplate2024/assets/66902140/31ba7931-71e5-471d-ac3b-1275d7ce495e)
 
   terus pencet Izinkan
