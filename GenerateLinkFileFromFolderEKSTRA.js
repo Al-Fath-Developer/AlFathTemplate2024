@@ -1,4 +1,4 @@
-const SPREADSHEET_ID = "1ctOcHpTTSP7zoSDARTSaq-BnNJaK3ssKfCRDWyX8h3E" //spreadsheet untuk rekap nya ada dimana
+// rekap ekstra
 const SHEET_REKAP_NAME = "Folder 1" // nama sheet untuk rekapnya ada dinana (pastiin kosong dulu)
 const ID_FOLDER_YANG_DITELUSURI = "1EP4swrEbsB7BRh9gO2Ok2-tEuL4cFjZ6"; // folder yang mau ditelusuri isi isinya th yang mana
 const INITIAL_ROW   =1 // tabel nya mau mulai dari row keberapa
@@ -6,14 +6,16 @@ const INITIAL_ROW   =1 // tabel nya mau mulai dari row keberapa
 
 
 
-const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_REKAP_NAME)
+const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_REKAP_NAME)
 
 let current_row = INITIAL_ROW
 
 function mulaiEkstraGenerate(){
-  header(current_row)
-  current_row++
+  header(current_row, DriveApp.getFolderById(ID_FOLDER_YANG_DITELUSURI).getName())
+  current_row = current_row + 2
   getFileLinksInFolder(ID_FOLDER_YANG_DITELUSURI)
+  footer(current_row)
+
 }
 
 function getFileLinksInFolder(folder_id) {
@@ -44,24 +46,40 @@ function getFileLinksInFolder(folder_id) {
     insertToSpreadsheet(current_row, fileUrl, fileName,fileType,fileSize, fileSharingType,fileCreateedAt,fileUpdatedAt, folderParent.name, folderParent.link)
         current_row++
 
+}
      var subfolders = folder.getFolders();
       while (subfolders.hasNext()) {
     var subfolder = subfolders.next();
     getFileLinksInFolder(subfolder.getId()); // Panggil fungsi lagi untuk subfolder ini
   }
-}
-
   }
 
  
 
-function header(row){
-  sheet.getRange(`A${row}:I${row}`).setValues([["Link", "Nama File", "Tipe File", "Ukuran", "Tipe Sharing", "Created at", "Updated at", "Parent Folder", "Parent Link"]]).setBackground("grey").setFontWeight("bold").setHorizontalAlignment("center").setWrap(true).setBorder(true,true,true,true,true,true)
+function header(row, nama_folder){
+  const cell_pojok_kiri_atas = sheet.getRange('A'+ row)
+  const waktu = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "EEEE, dd MMMM yyyy HH:mm:ss")
+  cell_pojok_kiri_atas.setBackground("black").setFontColor('white').setValue("Rekap til root Folder '" + nama_folder + "' Start From ± " +  waktu).setFontSize(13).setHorizontalAlignment('center').setFontWeight('bold')
+  sheet.getRange(`A${row}:I${row}`).merge()
+  sheet.getRange(`A${row + 1}:I${row + 1}`).setValues([["Nama File", "Link", "Tipe File", "Ukuran", "Tipe Sharing", "Created at", "Updated at", "Parent Link", "Parent Folder Name"]]).setBackground("grey").setFontWeight("bold").setHorizontalAlignment("center").setWrap(true).setBorder(true,true,true,true,true,true)
   
+}
+function footer(row){
+  Logger.log("beres tinggal footer di row + "+ row )
+  const cell_footer = sheet.getRange('A'+ row)
+
+  const waktu = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "EEEE, dd MMMM yyyy HH:mm:ss")
+  cell_footer.setBackground("black").setFontColor('white').setValue("Done. Finish Time ± " +  waktu).setFontSize(13).setHorizontalAlignment('center')
+  sheet.getRange(`A${row}:I${row}`).merge()
+  
+  const ig = "https://www.instagram.com/tiohaidarhanif/"
+  sheet.getRange('A' + (row + 1)).setValue("Penanggung Jawab Kodingan: Tio Haidar Hanif")
+  sheet.getRange('A' + (row + 2)).setFormula('=hyperlink("'+ig+'")')
+
 }
 function insertToSpreadsheet(row,url, name, type, size, sharing_type, created, edited, folderParentName, folderParentLink){
   Logger.log([row,url, name, type, size, sharing_type, created, edited, folderParentName])
-sheet.getRange(`A${row}:I${row}`).setValues([[url, name, type, size, sharing_type, created, edited, folderParentName, folderParentLink]]).setBackground("#fffffa").setFontWeight('normal').setHorizontalAlignments([['left', 'left', 'right', 'left', 'left', 'center', 'center', 'center', 'left']]).setWraps([[false, true, false, false, false,false,false, true, false]]).setBorder(true,true,true,true,true,true)
+sheet.getRange(`A${row}:I${row}`).setValues([[name,url, type, size, sharing_type, created, edited, folderParentLink, folderParentName]]).setBackground("#fffffa").setFontWeight('normal').setHorizontalAlignments([['center', 'left', 'right', 'left', 'left', 'center', 'center', 'left', 'left']]).setWraps([[true, false, false, false, false,false,false, false, true]]).setBorder(true,true,true,true,true,true)
 Logger.log("File Done: " + name)
 
 }
