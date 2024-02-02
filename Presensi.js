@@ -79,10 +79,16 @@ function cariPosisiNIM(nim){
 }
 
 // Fungsi untuk mengonversi format datetime
-function konversiDatetime(inputDatetime) {
+function konversiDatetime(timestampString) {
   try {
-    // Menggunakan objek Date untuk mengonversi datetime
-    return inputDatetime.slice(0,10);
+      var date = new Date(timestampString);
+        var day = date.getDate();
+        var month = date.getMonth() + 1;
+        var year = date.getFullYear();
+        day = day < 10 ? '0' + day : day;
+        month = month < 10 ? '0' + month : month;
+        return day + '/' + month + '/' + year;
+  
   } catch (error) {
     throw new Error("Error pada fungsi konversiDatetime: " + error.message);
   }
