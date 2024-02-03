@@ -53,13 +53,24 @@ function cariPosisiNIM(nim) {
 // Fungsi untuk konversi datetime
 function konversiDatetime(timestampString) {
   try {
-      var date = new Date(timestampString);
-        var day = date.getDate();
-        var month = date.getMonth() + 1;
-        var year = date.getFullYear();
-        day = day < 10 ? '0' + day : day;
-        month = month < 10 ? '0' + month : month;
-        return day + '/' + month + '/' + year;
+    Logger.log(timestampString)
+         var parts = timestampString.split('/'); // Memisahkan tanggal, bulan, dan tahun
+  var day = parts[0];
+  var month = parts[1];
+  var year = parts[2];
+
+  // Menambahkan leading zero jika diperlukan
+  if (day.length === 1) {
+    day = '0' + day;
+  }
+  if (month.length === 1) {
+    month = '0' + month;
+  }
+  year = year.substring(0,4)
+
+  // Menggabungkan kembali string dengan leading zero
+  Logger.log(day + '/' + month + '/' + year)
+  return day + '/' + month + '/' + year;
   
   } catch (error) {
     throw new Error("Error pada fungsi konversiDatetime: " + error.message);
