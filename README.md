@@ -1,5 +1,8 @@
 # Al Fath Template 2024
 
+## Panduan Penggunaan
+Presensi dan perizinan ->>> https://docs.google.com/document/d/1VcQltbqTWkMBB1LjqJMEI17uB2JOSwNoHAkQemhn8cE/edit
+
 ## Note
 Untuk menggunakan template ini, pastikan setingan spreadsheet nya seperti ini
 
