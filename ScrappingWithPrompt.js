@@ -3,8 +3,8 @@ function onOpen() {
 const ui = SpreadsheetApp.getUi();
   try {
     ui.createMenu('Scrapping')
-      .addItem("Mode Per Folder", "startGeneratePromptPerFolder")
       .addItem("Mode Simple", "startGeneratePromptAllFolderInEmail")
+      .addItem("Mode Per Folder", "startGeneratePromptPerFolder")
       .addToUi();
   } catch (error) {
     throw new Error("Error in onOpen function: " + error.message);
@@ -14,14 +14,18 @@ const ui = SpreadsheetApp.getUi();
 function startGeneratePromptAllFolderInEmail() {
     const ui = SpreadsheetApp.getUi();
   try {
-    const alertMessage = "Proses Scrapping Insya Allah akan dimulai. Tekan OK lalu Silakan menunggu.\n\nCatatan: Proses ini mungkin memakan waktu yang cukup lama. Anda bisa melakukan kegiatan lain sambil menunggu.\n\nJika Anda mendapatkan kesalahan terkait jumlah eksekusi yang telah mencapai batas maksimum, jalankan fitur ini lagi. Lakukan langkah tersebut hingga Anda melihat tulisan 'Done' di baris terbawah.";
-    ui.alert(alertMessage);
+    SKIP_TILL = sheet.getLastRow();
+    const alertMessage = "Proses Scrapping Insya Allah akan dimulai. Update bakal dilakukan dari baris ke "+SKIP_TILL+"\n Tekan OK lalu Silakan menunggu.\n\nCatatan: Proses ini mungkin memakan waktu yang cukup lama. Anda bisa melakukan kegiatan lain sambil menunggu.\n\nJika Anda mendapatkan kesalahan terkait jumlah eksekusi yang telah mencapai batas maksimum, jalankan fitur ini lagi. Lakukan langkah tersebut hingga Anda melihat tulisan 'Done' di baris terbawah.";
+    const uiResponse = ui.alert("Ok Siap", alertMessage, ui.ButtonSet.OK_CANCEL);
+    if (uiResponse == ui.Button.OK){
+
   
     const rootFolder = DriveApp.getRootFolder();
     const driveId = rootFolder.getId();
     ID_FOLDER_YANG_DITELUSURI = driveId;
-    SKIP_TILL = sheet.getLastRow();
     startGeneration();
+    }
+
   } catch (error) {
     Logger.log("Error in startGeneratePromptAllFolderInEmail function: " + error.message);
     ui.alert("Maaf, terjadi kesalahan: " + error.message);
@@ -168,7 +172,10 @@ function getParentFolder(file) {
 
 function header(row, folderName) {
   try {
+    if (ID_FOLDER_YANG_DITELUSURI != DriveApp.getRootFolder().getId()){
+
     sheet.setName(folderName);
+    }
     const topLeftCell = sheet.getRange('A' + row);
     const time = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "EEEE, dd MMMM yyyy HH:mm:ss");
     topLeftCell.setBackground("black").setFontColor('white').setValue("Scrapping Folder '" + folderName + "' Start From ± " + time).setFontSize(13).setHorizontalAlignment('center').setFontWeight('bold');
