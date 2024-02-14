@@ -19,10 +19,9 @@ Selamat datang di Manual Penggunaan Aplikasi Pengambilan Data Google Drive. Pand
 
 2. Tempelkan kode yang telah disalin ke dalam editor skrip.
 
-### Langkah 4: Simpan dan Beri Nama Proyek
+### Langkah 4: Simpan
 
-1. Beri nama proyek dengan memilih menu "File" -> "Save" dan masukkan nama proyek yang diinginkan.
-2. Klik tombol "OK" untuk menyimpan proyek.
+1. Tekan Ctrl S untuk menyimpan kode tersebut
 
 ### Langkah 5: Berikan Izin Akses
 
