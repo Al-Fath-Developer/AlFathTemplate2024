@@ -1,13 +1,14 @@
 const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet()
 const source = activeSpreadsheet.getSheetByName("Source");
 const sheet_barcode = activeSpreadsheet.getSheetByName("Barcode")
-const link_appscript = "https://script.google.com/macros/s/AKfycbxvlR4PccmSdBQVV4GTQG9UKmrc0dYnbMYpsunoDjGqpJ1MVHbdo5dMhcRxdQNgpBg8/exec"
+const link_appscript = "https://script.google.com/macros/s/AKfycbx-bYjFx1sdVksILPE2EDYH6cA-eyMUHemo6wjtFTjTA6kDXMrHuyJ--DRCa2ARG8GM/exec"
 const id_template_ticket = "12tI9lCLZMowaHy-J88tu4w7BzGXQk7OtNZHAAqcKDlI"
 const id_folder_ticket = "1kM76EiWtYRwQJcoBPVaCPjnXPCXWZj0L"
 const id_spreadsheet_panitia = "1dBqkEpYvpBRS3nz3yjwdcfKfYRjoL5bFbhojeZwObO8"
 const spreadsheet_panitia = SpreadsheetApp.openById(id_spreadsheet_panitia)
 
 function dump(){
+  Logger.log(createBarcode(123,"Laki laki"))
 }
 
 function onFormSubmited(e) {
@@ -105,7 +106,7 @@ function getRandomInteger(min, max) {
 
 function createBarcode(id, jenis_kelamin){
   const api_barcode = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="
-  let link_barcode = api_barcode + link_appscript + "?kode=" + id+"&jeniskelamin="+jenis_kelamin 
+  let link_barcode = api_barcode +  encodeURI(link_appscript + "?id_jk=" + id+"_"+jenis_kelamin ) // id sama jenis kelamin  dijadiin satu query aja
   return link_barcode
 
 }
