@@ -1,9 +1,14 @@
 const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet()
 const source = activeSpreadsheet.getSheetByName("Source");
 const sheet_barcode = activeSpreadsheet.getSheetByName("Barcode")
-const link_appscript = "appscript"
+const link_appscript = "https://script.google.com/macros/s/AKfycbxvlR4PccmSdBQVV4GTQG9UKmrc0dYnbMYpsunoDjGqpJ1MVHbdo5dMhcRxdQNgpBg8/exec"
 const id_template_ticket = "12tI9lCLZMowaHy-J88tu4w7BzGXQk7OtNZHAAqcKDlI"
 const id_folder_ticket = "1kM76EiWtYRwQJcoBPVaCPjnXPCXWZj0L"
+const id_spreadsheet_panitia = "1dBqkEpYvpBRS3nz3yjwdcfKfYRjoL5bFbhojeZwObO8"
+const spreadsheet_panitia = SpreadsheetApp.openById(id_spreadsheet_panitia)
+
+function dump(){
+}
 
 function onFormSubmited(e) {
    const inputan = e.values;
@@ -16,17 +21,21 @@ function onFormSubmited(e) {
    Logger.log("data masuk")
    Logger.log(konfirmasi)
    if (konfirmasi =="Insya Allah hadir"){
-    addToSheetBarcode(waktu, nim, nama, jenis_kelamin, email)
+    addToSheetBarcode(waktu, nim, nama, jenis_kelamin, email,)
+   }else{
+    sendDataToSpreadsheetPanitia(waktu, nim, nama, jenis_kelamin, email, "-", "Izin")
    }
 }
 
 function addToSheetBarcode(waktu, nim, nama, jenis_kelamin, email){
-  const id = nim + getRandomInteger(1,10).toString()
-  const link_barcode = createBarcode(id)
+  const id = nim + Date.now()
+  const link_barcode = createBarcode(id, jenis_kelamin)
 
   const link_ticket = createTicket(waktu, nim, nama, jenis_kelamin, email, id, link_barcode)
   sheet_barcode.appendRow([waktu, nim, nama, jenis_kelamin, email, id, link_barcode, link_ticket])
   Logger.log("Berhasil tambah ke sheet")
+  Logger.log(sendDataToSpreadsheetPanitia(waktu, nim, nama, jenis_kelamin, email, id, "Belum hadir"))
+  
 
 }
 function createTicket(waktu, nim, nama, jenis_kelamin, email, id, link_barcode){
@@ -38,12 +47,14 @@ function createTicket(waktu, nim, nama, jenis_kelamin, email, id, link_barcode){
   body.replaceText("<<jenis_kelamin>>", jenis_kelamin)
   body.replaceText("<<waktu>>", waktu)
   body.replaceText("<<email>>", email)
-  body.appendImage(linkToImage(link_barcode))
+  body.insertImage(1,linkToImage(link_barcode))
+  body.getChild(1).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER)
+    
   
   newDoc.saveAndClose()
 Logger.log("Berhasil bikin tiket")
 // pindah file
-  DriveApp.getFileById(id_newDoc).moveTo(DriveApp.getFolderById(id_folder_ticket)).setName(id + nama + waktu)
+  DriveApp.getFileById(id_newDoc).moveTo(DriveApp.getFolderById(id_folder_ticket)).setName(waktu + "_" + jenis_kelamin + "_"+nama)
   sendTicketToEmail(id_newDoc, email)
   return newDoc.getUrl()
 
@@ -64,6 +75,24 @@ function sendTicketToEmail(id_newDoc, email){
   Logger.log("berhasil kirim")
 
 }
+function sendDataToSpreadsheetPanitia(waktu, nim, nama, jenis_kelamin, email, id, status){
+  if(jenis_kelamin =="Laki-laki"){
+
+const lr = spreadsheet_panitia.getSheetByName("Ikhwan").appendRow([id, waktu, nama, status,"teken Ctrl D di kolom ini", email, jenis_kelamin, nim]).getLastRow();
+spreadsheet_panitia.getSheetByName("Ikhwan").getRange("E"+lr).setValue(`=IF(D${lr}="Hadir";IF(E${lr}<>"";E${lr};now());"")`)
+
+
+  }else if (jenis_kelamin == "Perempuan"){
+const lr = spreadsheet_panitia.getSheetByName("Akhwat").appendRow([id, waktu, nama, status,"teken Ctrl D di kolom ini", email, jenis_kelamin, nim]).getLastRow()
+spreadsheet_panitia.getSheetByName("Akhwat").getRange("E"+lr).setValue(`=IF(D${lr}="Hadir";IF(E${lr}<>"";E${lr};now());"")`)
+
+
+  }else{
+    
+    throw new Error("Jenis kelamin tidak diketahui");
+  }
+
+}
 
 
 
@@ -74,9 +103,9 @@ function getRandomInteger(min, max) {
 }
 
 
-function createBarcode(id){
+function createBarcode(id, jenis_kelamin){
   const api_barcode = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="
-  let link_barcode = api_barcode + link_appscript + "?unique=" + id
+  let link_barcode = api_barcode + link_appscript + "?kode=" + id+"&jeniskelamin="+jenis_kelamin 
   return link_barcode
 
 }
