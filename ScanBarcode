@@ -1,0 +1,75 @@
+const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+const sheet_ikhwan = activeSpreadsheet.getSheetByName("Ikhwan")
+const sheet_akhwat = activeSpreadsheet.getSheetByName("Akhwat")
+
+function doGet(e) {
+const user = Session.getActiveUser().getEmail();
+  const kode = e.parameter.kode;
+  const jeniskelamin = e.parameter.jeniskelamin; // jenis kelamin penulisannya sesuai dengan yang di google form
+ Logger.log(kode + jeniskelamin)
+  const yang_dateng = setHadir(kode, jeniskelamin)
+  return HtmlService.createHtmlOutput("Makasih udah mau bantu  dengan email " + user +". \n Yang dateng: "+ yang_dateng)
+
+  
+
+
+
+}
+
+function setHadir(kode, jeniskelamin){
+  let posisi_kode;
+  try{
+
+  if (jeniskelamin == "Laki-laki"){
+    posisi_kode = cariPosisiKodeIkhwan(kode)
+    if (posisi_kode>0){
+
+    sheet_ikhwan.getRange(posisi_kode,4).setValue("Hadir")
+    return sheet_ikhwan.getRange(posisi_kode,1,1,7).getValues()
+    }
+    
+  }else if (jeniskelamin == "Perempuan"){
+
+    posisi_kode = cariPosisiKodeAkhwat(kode)
+        if (posisi_kode>0){
+    sheet_akhwat.getRange(posisi_kode,4).setValue("Hadir")
+    return sheet_akhwat.getRange(posisi_kode,1,1,7).getValues()
+    }
+
+
+
+  }else{
+  throw new Error("jenis kelamin tidak valid")
+
+  }
+  throw new Error("QR Code Tidak Valid")
+  }
+  catch(e){
+    Logger.log(e)
+    return "Ada kesalahan" + e.message
+  }
+
+
+}
+function cariPosisiKodeIkhwan(kode) {
+  try {
+    const lastRow = sheet_ikhwan.getLastRow();
+      const list_kode = sheet_ikhwan.getRange(1,1,lastRow).getValues()
+   const posisi =  list_kode.findIndex((kode_from_sheet)=>kode_from_sheet[0].toString() == kode)
+  return posisi > 0? posisi + 1: posisi
+   
+  } catch (error) {
+    throw new Error("Error pada fungsi cariPosisikode: " + error.message);
+  }
+}
+function cariPosisiKodeAkhwat(kode) {
+  try {
+    const lastRow = sheet_akhwat.getLastRow();
+      const list_kode = sheet_akhwat.getRange(1,1,lastRow).getValues()
+   const posisi =  list_kode.findIndex((kode_from_sheet)=>kode_from_sheet[0].toString() == kode)
+  return posisi > 0? posisi + 1: posisi
+   
+  } catch (error) {
+    throw new Error("Error pada fungsi cariPosisikode: " + error.message);
+  }
+}
