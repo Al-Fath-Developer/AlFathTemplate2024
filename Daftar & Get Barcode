@@ -1,0 +1,82 @@
+const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+const source = activeSpreadsheet.getSheetByName("Source");
+const sheet_barcode = activeSpreadsheet.getSheetByName("Barcode")
+const link_appscript = "appscript"
+const id_template_ticket = "12tI9lCLZMowaHy-J88tu4w7BzGXQk7OtNZHAAqcKDlI"
+const id_folder_ticket = "1kM76EiWtYRwQJcoBPVaCPjnXPCXWZj0L"
+
+function onFormSubmited(e) {
+   const inputan = e.values;
+   const waktu = inputan[0];
+   const nim = inputan[1];
+   const nama = inputan[2];
+   const jenis_kelamin = inputan[3];
+   const konfirmasi = inputan[4];
+   const email = inputan[5];
+   Logger.log("data masuk")
+   Logger.log(konfirmasi)
+   if (konfirmasi =="Insya Allah hadir"){
+    addToSheetBarcode(waktu, nim, nama, jenis_kelamin, email)
+   }
+}
+
+function addToSheetBarcode(waktu, nim, nama, jenis_kelamin, email){
+  const id = nim + getRandomInteger(1,10).toString()
+  const link_barcode = createBarcode(id)
+
+  const link_ticket = createTicket(waktu, nim, nama, jenis_kelamin, email, id, link_barcode)
+  sheet_barcode.appendRow([waktu, nim, nama, jenis_kelamin, email, id, link_barcode, link_ticket])
+  Logger.log("Berhasil tambah ke sheet")
+
+}
+function createTicket(waktu, nim, nama, jenis_kelamin, email, id, link_barcode){
+  const id_newDoc = DriveApp.getFileById(id_template_ticket).makeCopy().getId()
+  const newDoc = DocumentApp.openById(id_newDoc)
+  const body = newDoc.getBody();
+  body.replaceText("<<nama>>", nama)
+  body.replaceText("<<nim>>", nim)
+  body.replaceText("<<jenis_kelamin>>", jenis_kelamin)
+  body.replaceText("<<waktu>>", waktu)
+  body.replaceText("<<email>>", email)
+  body.appendImage(linkToImage(link_barcode))
+  
+  newDoc.saveAndClose()
+Logger.log("Berhasil bikin tiket")
+// pindah file
+  DriveApp.getFileById(id_newDoc).moveTo(DriveApp.getFolderById(id_folder_ticket)).setName(id + nama + waktu)
+  sendTicketToEmail(id_newDoc, email)
+  return newDoc.getUrl()
+
+
+
+
+
+
+
+
+}
+function linkToImage(link_barcode){
+  return UrlFetchApp.fetch(link_barcode)
+}
+
+function sendTicketToEmail(id_newDoc, email){
+  DriveApp.getFileById(id_newDoc).addViewer(email);
+  Logger.log("berhasil kirim")
+
+}
+
+
+
+
+function getRandomInteger(min, max) {
+  var randomInteger = Math.floor(Math.random() * (max - min + 1)) + min;
+  return randomInteger;
+}
+
+
+function createBarcode(id){
+  const api_barcode = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="
+  let link_barcode = api_barcode + link_appscript + "?unique=" + id
+  return link_barcode
+
+}
