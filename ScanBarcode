@@ -4,10 +4,10 @@ const sheet_akhwat = activeSpreadsheet.getSheetByName("Akhwat")
 
 function doGet(e) {
 const user = Session.getActiveUser().getEmail();
-  const kode = e.parameter.kode;
-  const jeniskelamin = e.parameter.jeniskelamin; // jenis kelamin penulisannya sesuai dengan yang di google form
- Logger.log(kode + jeniskelamin)
-  const yang_dateng = setHadir(kode, jeniskelamin)
+  const id_jk = e.parameter.id_jk.split("_"); // id sama jenis kelamin dipisah make underscore gini
+  
+ Logger.log(id_jk)
+  const yang_dateng = setHadir(id_jk[0], id_jk[1])
   return HtmlService.createHtmlOutput("Makasih udah mau bantu  dengan email " + user +". \n Yang dateng: "+ yang_dateng)
 
   
@@ -16,24 +16,24 @@ const user = Session.getActiveUser().getEmail();
 
 }
 
-function setHadir(kode, jeniskelamin){
-  let posisi_kode;
+function setHadir(id, jeniskelamin){
+  let posisi_id;
   try{
 
   if (jeniskelamin == "Laki-laki"){
-    posisi_kode = cariPosisiKodeIkhwan(kode)
-    if (posisi_kode>0){
+    posisi_id = cariPosisiidIkhwan(id)
+    if (posisi_id>0){
 
-    sheet_ikhwan.getRange(posisi_kode,4).setValue("Hadir")
-    return sheet_ikhwan.getRange(posisi_kode,1,1,7).getValues()
+    sheet_ikhwan.getRange(posisi_id,4).setValue("Hadir")
+    return sheet_ikhwan.getRange(posisi_id,1,1,7).getValues()
     }
     
   }else if (jeniskelamin == "Perempuan"){
 
-    posisi_kode = cariPosisiKodeAkhwat(kode)
-        if (posisi_kode>0){
-    sheet_akhwat.getRange(posisi_kode,4).setValue("Hadir")
-    return sheet_akhwat.getRange(posisi_kode,1,1,7).getValues()
+    posisi_id = cariPosisiidAkhwat(id)
+        if (posisi_id>0){
+    sheet_akhwat.getRange(posisi_id,4).setValue("Hadir")
+    return sheet_akhwat.getRange(posisi_id,1,1,7).getValues()
     }
 
 
@@ -51,25 +51,25 @@ function setHadir(kode, jeniskelamin){
 
 
 }
-function cariPosisiKodeIkhwan(kode) {
+function cariPosisiidIkhwan(id) {
   try {
     const lastRow = sheet_ikhwan.getLastRow();
-      const list_kode = sheet_ikhwan.getRange(1,1,lastRow).getValues()
-   const posisi =  list_kode.findIndex((kode_from_sheet)=>kode_from_sheet[0].toString() == kode)
+      const list_id = sheet_ikhwan.getRange(1,1,lastRow).getValues()
+   const posisi =  list_id.findIndex((id_from_sheet)=>id_from_sheet[0].toString() == id)
   return posisi > 0? posisi + 1: posisi
    
   } catch (error) {
-    throw new Error("Error pada fungsi cariPosisikode: " + error.message);
+    throw new Error("Error pada fungsi cariPosisiid: " + error.message);
   }
 }
-function cariPosisiKodeAkhwat(kode) {
+function cariPosisiidAkhwat(id) {
   try {
     const lastRow = sheet_akhwat.getLastRow();
-      const list_kode = sheet_akhwat.getRange(1,1,lastRow).getValues()
-   const posisi =  list_kode.findIndex((kode_from_sheet)=>kode_from_sheet[0].toString() == kode)
+      const list_id = sheet_akhwat.getRange(1,1,lastRow).getValues()
+   const posisi =  list_id.findIndex((id_from_sheet)=>id_from_sheet[0].toString() == id)
   return posisi > 0? posisi + 1: posisi
    
   } catch (error) {
-    throw new Error("Error pada fungsi cariPosisikode: " + error.message);
+    throw new Error("Error pada fungsi cariPosisiid: " + error.message);
   }
 }
