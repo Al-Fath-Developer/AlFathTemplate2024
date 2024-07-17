@@ -4,16 +4,16 @@
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('PDF Generator')
-    .addItem('Generate PDFs from Slides', 'generatePDFsFromSlides')
-    .addItem('Generate PDFs from Docs', 'generatePDFsFromDocs')
-    .addItem('Create Template', 'createTemplate')
+    .addItem('Generate PDF dari Google Slides', 'generatePDFsFromSlides')
+    .addItem('Generate PDF dari Docs', 'generatePDFsFromDocs')
+    .addItem('Membuat Template Konfigurasi', 'createTemplate')
 
     .addToUi();
     ui.createMenu('Drive Tools')
-      .addItem('Ekstrak Nama dan Deskripsi', 'extractFileInfo')
-      .addItem('Update Nama dan Deskripsi', 'updateFileInfo')
+      .addItem('Ekstrak Nama dan Deskripsi File', 'extractFileInfo')
+      .addItem('Update Nama dan Deskripsi File', 'updateFileInfo')
       .addItem('Ekstrak Gambar ke Cell', 'insertImages')
-            .addItem('Ekstrak List Link File', 'generateFileList')
+            .addItem('Ekstrak Kumpulan Link File dari Folder', 'generateFileList')
 
 
       .addToUi();
@@ -445,6 +445,103 @@ function getIdFromUrl(url) {
 }
 
 
-// ini kodingan mayoritas dibuat oleh ChatGPT, tio cuman minor aja
+
+/**
+ * Mengembalikan Ayat dari Surah tertentu
+ * masukan teks surah dan ayat dengan format =  surah:ayat, contoh 1:7
+ * @param {String} masukan teks surah dan ayat dengan format surah:ayat, contoh 1:7
+ * @return Ayat yang diminta
+ * @customfunction
+ */
+function GETAYAT(text){
+  try{
+
+   const dataAyat  = JSON.parse(UrlFetchApp.fetch("https://api.alquran.cloud/v1/ayah/" +text ))
+            
+            if (dataAyat["code"] == 200){
+                const result =  { ayat: dataAyat["data"]["text"], surah: dataAyat["data"]["surah"]["name"], no_ayat : dataAyat["data"]["numberInSurah"], juz:dataAyat['data']['juz']} 
+                return result.ayat
+            }else{
+              return "data ayat tidak valid"
+            }
+
+  }catch(e){
+    return e.message
+  }
+}
+
+/**
+ * Mengembalikan Makna dari Kata tertentu
+  * @param {String} masukan teks surah dan ayat dengan format surah:ayat, contoh 1:7
+ * @return Manknaa yang diminta
+ * @customfunction
+ */
+function GETKBBI(text){
+  try{
+
+   const dataMakna  = JSON.parse(UrlFetchApp.fetch("https://yasirapi.eu.org/kbbi?kata=" +text ))
+            const hasil = []
+            if (dataMakna["link"]){
+              let result = dataMakna["result"]
+              result.forEach((e)=>{
+                e["makna"].forEach((e)=>{
+                  hasil.push(e["submakna"])
+                })
+              })
+              hasil.push(dataMakna["link"])
+              return hasil
+                 
+            }
+              return "inputan  tidak valid"
+
+  }catch(e){
+    return e.message
+  }
+}
+
+
+
+
+
+// /**
+//  * Mengambil jumlah followers instagram  
+//  * @customfunction
+//  */
+// function FETCHCOUNTINSTAGRAMFOLLOWERS(username) {
+//   var url = 'https://viralmango.com/vm-insta-calc/';  // URL yang sesuai untuk formulir
+  
+//   // Menggunakan UrlFetchApp untuk mengirim data ke situs web
+//   var response = UrlFetchApp.fetch(url, {
+//     method: 'post',
+//     payload: {
+//       'type[profile]': '1',
+//       'username': username
+//     },
+//   });
+//   Logger.log("hasilnya " + response)
+  
+//   var content = response.getContentText();
+  
+//   // Tampilkan hasil respons ke log untuk debugging
+//   Logger.log('Response Content for username ' + username + ':');
+//   Logger.log(content);
+  
+//   // Memparsing JSON dan mengekstrak data
+//   var json = JSON.parse(content);
+//   var profile = json.profile || {};
+  
+//   const data =  {
+//     numberOfFollowers: profile.fields ? profile.fields.followers_count.format : 'Not Found',
+//     engagementRate: profile.fields ? profile.fields.engagement_rate.format : 'Not Found',
+//     averageLikes: profile.fields ? profile.fields.average_likes.format : 'Not Found',
+//     averageComments: profile.fields ? profile.fields.average_comments.format : 'Not Found',
+//     commentsLikesRatio: profile.fields ? profile.fields.comments_likes_ratio.format : 'Not Found',
+//     averageVideosViews: profile.fields ? profile.fields.average_videos_views.format : 'Not Found',
+//   };
+//   return data.numberOfFollowers
+// }
+
+
+// ini kodingan mayoritas dibuat oleh ChatGPT, tio cuman minor aja, dibantu mas Wafiq Juga
 
 //contoh sheet: https://docs.google.com/spreadsheets/d/18TRhW0InKjDxEXno3NkYqPD91itMC97Pg3ViJ36HLlg/edit?gid=0#gid=0
