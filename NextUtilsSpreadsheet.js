@@ -390,7 +390,7 @@ function generateFileList() {
   }
 
   var folder = DriveApp.getFolderById(folderId);
-
+  
   // Meminta input kolom untuk menyimpan hasil
   var responseResultCol = ui.prompt('Masukkan nomor kolom untuk menyimpan hasil (misal: 1 untuk kolom A):');
   var resultCol = parseInt(responseResultCol.getResponseText());
@@ -399,17 +399,15 @@ function generateFileList() {
   sheet.getRange(1, resultCol).clear(); // Membersihkan kolom hasil sebelum menulis baru
   sheet.getRange(1, resultCol).setValue('Link');
   sheet.getRange(1, resultCol + 1).setValue('Judul File');
-  sheet.getRange(1, resultCol + 2).setValue('Nama Folder Parent');
+  sheet.getRange(1, resultCol + 2).setValue('Nama Folder');
 
   var stack = []; // Stack untuk menyimpan folder yang akan dieksplorasi
-  stack.push({ folder: folder, parentName: '' }); // Memasukkan folder utama ke dalam stack
+  stack.push(folder); // Memasukkan folder utama ke dalam stack
 
   var row = 2;
 
   while (stack.length > 0) {
-    var current = stack.pop();
-    var currentFolder = current.folder;
-    var parentFolderName = current.parentName;
+    var currentFolder = stack.pop();
 
     var files = currentFolder.getFiles();
     while (files.hasNext()) {
@@ -419,20 +417,21 @@ function generateFileList() {
       var fileUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
       sheet.getRange(row, resultCol).setValue(fileUrl);
       sheet.getRange(row, resultCol + 1).setValue(fileTitle);
-      sheet.getRange(row, resultCol + 2).setValue(parentFolderName);
+      sheet.getRange(row, resultCol + 2).setValue(currentFolder.getName());
       row++;
     }
 
     var subfolders = currentFolder.getFolders();
     while (subfolders.hasNext()) {
       var subfolder = subfolders.next();
-      stack.push({ folder: subfolder, parentName: currentFolder.getName() });
+      stack.push(subfolder);
     }
   }
 
   // Memberi tahu bahwa proses selesai
   ui.alert('Proses selesai', 'List link file sudah dibuat di spreadsheet Anda.', ui.ButtonSet.OK);
 }
+
 
 // Fungsi untuk mendapatkan ID folder dari URL
 function getIdFromUrl(url) {
