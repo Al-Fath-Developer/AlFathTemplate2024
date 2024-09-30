@@ -23,6 +23,8 @@ function onOpen() {
 
       .addToUi();
       ui.createMenu('Email Tools')
+
+      .addItem('Share File to Email', 'shareFilesByEmail')
       .addItem('Send Email Bulk', 'sendEmailBulk').addToUi();
 }
 
@@ -496,8 +498,90 @@ function sendEmailBulk() {
     sheet.getRange(data.length + 1, 1).setValue("Selesai");
   }
 }
+function shareFilesByEmail() {
+  // Dapatkan data dari sheet
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var headers = data.shift(); // Pisahkan header dari data
+
+  // Cari kolom email dan link
+  var emailColIndex = headers.indexOf("Email");
+  var linkColIndex = headers.indexOf("Link");
+  var statusColIndex = headers.indexOf("Status");
+
+  // Validasi kolom
+  if (emailColIndex == -1 || linkColIndex == -1 || statusColIndex == -1) {
+    SpreadsheetApp.getUi().alert("Pastikan tabel memiliki kolom 'Email', 'Link', dan 'Status'");
+    return;
+  }
+
+  // Hitung berapa banyak file yang akan dibagikan
+  var filesToShare = data.filter(function(row) {
+    return row[statusColIndex] != "TRUE"; // Hanya hitung baris yang belum di-checklist
+  }).length;
+
+  // Konfirmasi sebelum memulai
+  var ui = SpreadsheetApp.getUi();
+  var response = ui.alert(
+    "Konfirmasi",
+    "Akan membagikan akses ke " + filesToShare + " file. Lanjutkan?",
+    ui.ButtonSet.YES_NO
+  );
+
+  if (response == ui.Button.NO) {
+    return; // Batalkan jika pengguna memilih tidak
+  }
+
+  // Proses setiap baris data
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    var email = row[emailColIndex];
+    var link = row[linkColIndex];
+
+    // Lewati jika sudah ada checklist
+    if (row[statusColIndex] == "TRUE") {
+      continue;
+    }
+
+    try {
+      // Dapatkan ID file dari link
+      var fileId = extractFileIdFromLink(link);
+
+      // Bagikan file dengan akses view
+      DriveApp.getFileById(fileId).addViewer(email)
+      // Tandai selesai
+      sheet.getRange(i + 2, statusColIndex + 1).setValue("TRUE"); // +2 karena ada header dan indeks mulai dari 0
+    } catch (error) {
+      // Tangani error
+      sheet.getRange(i + 2, statusColIndex + 1).setValue("Error: " + error.message);
+    }
+  }
+
+  // Tampilkan pesan selesai
+  ui.alert("Selesai!");
+}
+
+// Fungsi untuk mendapatkan ID file dari berbagai jenis link
+function extractFileIdFromLink(link) {
+  var match;
+
+  // Cek apakah link menggunakan format drive.google.com/file/d/...
+  match = link.match(/\/file\/d\/([^/?]+)/);
+  if (match) {
+    return match[1];
+  }
+
+  // Cek apakah link menggunakan format drive.google.com/open?...
+  match = link.match(/[?&]id=([^&]+)/);
+  if (match) {
+    return match[1];
+  }
+
+  // Jika tidak cocok dengan format yang dikenal, throw error
+  throw new Error("Format link tidak valid");
+}
 
 
-// ini kodingan mayoritas dibuat oleh ChatGPT,  sama Gemini Advance. tio cuman minor aja
+// ini kodingan mayoritas dibuat oleh ChatGPT & Gemini, tio cuman minor aja
 
 //contoh sheet: https://docs.google.com/spreadsheets/d/18TRhW0InKjDxEXno3NkYqPD91itMC97Pg3ViJ36HLlg/edit?gid=0#gid=0
